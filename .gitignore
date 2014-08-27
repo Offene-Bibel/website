@@ -1,0 +1,5 @@
+mysqldump.bin
+*.zip
+*.tgz
+*.swp
+.directory
