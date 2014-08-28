@@ -5,13 +5,14 @@ use strict;
 use Getopt::Long;
 use POSIX qw(strftime);
 use File::Slurp;
+use FindBin;
 
-my $resourceFolder = "resources";
-my $webFolder = "/kunden/248589_32760/webseiten/offene-bibel.de";
-my $outputFolder = "snapshot-" . strftime("%Y-%m-%d", localtime);
-my $outputFile = $outputFolder . ".tgz";
-my $dbUser = "db248589_2";
-my $dbName = "db248589_2";
+my $drupalSrcFolder = "/kunden/248589_32760/webseiten/ptesting";
+my $wikiSrcFolder = "/kunden/248589_32760/webseiten/wtesting/wiki";
+my $outputFolder = "$FindBin::Bin/..";
+my $outputFile = "snapshot-" . strftime("%Y-%m-%d", localtime) . ".tgz";
+my $dbUser = "db248589_7";
+my $dbName = "db248589_7";
 my $dbHost = "mysql5.offene-bibel.de";
 
 GetOptions ("source:s" => \$webFolder,
@@ -22,10 +23,7 @@ GetOptions ("source:s" => \$webFolder,
             )
             or die("Error in command line arguments\n");
 
-die "Output folder path already exists" if -e $outputFolder;
 die "Output file already exists" if -e $outputFile;
-
-mkdir $outputFolder;
 
 print "Enter the DB password: ";
 my $dbPassword = <STDIN>; chomp $dbPassword;
@@ -35,28 +33,19 @@ print 'Creating database dump... ';
     print `mysqldump -u$dbUser -p$dbPassword -h$dbHost $dbName -r$outputFolder/mysqldump.bin`;
 say 'done';
 
-print 'Copying drupal and mediawiki... ';
-    my $drupalFolder = $outputFolder . "/drupal";
-    print `cp -r $webFolder $drupalFolder`;
+print 'Copying drupal... ';
+    print `rm -r $outputFolder/drupal`;
+    print `cp -r $drupalSrcFolder $outputFolder/drupal`;
 say 'done';
 
-# copy mediawiki
-print 'Moving mediawiki to separate folder... ';
-    print `mv $drupalFolder/wiki $outputFolder/mediawiki`;
-say 'done';
-
-# copy supplementary files (documentation, helper scripts, ...)
-print 'Copying supplementary files... ';
-    print `cp $resourceFolder/* $outputFolder`;
+print 'Copying mediawiki... ';
+    print `rm -r $outputFolder/mediawiki`;
+    print `cp -r $mediawikiSrcFolder $outputFolder/mediawiki`;
 say 'done';
 
 print 'Replacing database credentials... ';
     my @fileList = qw(
-    mediawiki/skins/OffeneBibel.php
     mediawiki/LocalSettings.php
-    drupal/sites/all/themes/offenebibel/page.tpl.php
-    drupal/sites/all/modules/mediawikiauth/mediawikiauth.module
-    drupal/sites/all/modules/mediawikiauth/Mediawiki.module
     drupal/sites/default/settings.php
     );
 
@@ -66,9 +55,15 @@ print 'Replacing database credentials... ';
         chmod 0660, $file;
         open (OUT, ">", $file) or die $!;
         for (@lines) {
+            if m/^(.*)\/\/<<&REPLACEMENT&>>(.*)$/ {
+                print "$2//<<&REPLACEMENT&>>$2";
+            }
+
             s/$dbPassword/<&db_password&>/g;
-            s/$dbName/<&db_name_or_user&>/g;
+            s/$dbName/<&db_name&>/g;
+            s/$dbUser/<&db_user&>/g;
             s/$dbHost/<&db_host&>/g;
+            s/$dbHost/<&db_host_port&>/g;
             print OUT; 
         }
         close OUT;
