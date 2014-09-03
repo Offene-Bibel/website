@@ -78,12 +78,11 @@ DirectoryIndex index.php index.html index.htm
   # downloaded.
   RewriteRule "(^|/)\." - [F]
 
-  # To redirect all users to access the site WITH the 'www.' prefix,
-  # (http://example.com/... will be redirected to http://www.example.com/...)
+  # To redirect all users to access the site WITHOUT the 'www.' prefix,
+  # (http://www.example.com/... will be redirected to http://example.com/...)
   # uncomment the following:
-  RewriteCond %{HTTP_HOST} .
-  RewriteCond %{HTTP_HOST} !^www\. [NC]
-  RewriteRule ^ http%{ENV:protossl}://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ http%{ENV:protossl}://%1%{REQUEST_URI} [L,R=301]
 
   RewriteBase /
 
@@ -95,9 +94,10 @@ DirectoryIndex index.php index.html index.htm
   # Pass all requests not referring directly to files in the filesystem to
   # index.php. Clean URLs are handled in drupal_environment_initialize().
   RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
+  # Disable check for directory to make / also be forwarded to drupal
+  #RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_URI} !=/favicon.ico
-  RewriteRule ^ index.php [L]
+  RewriteRule ^.*$ /drupal/index.php?q=$0 [L,QSA]
 
   # Rules to correctly serve gzip compressed CSS and JS files.
   # Requires both mod_rewrite and mod_headers to be enabled.
