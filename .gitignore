@@ -3,3 +3,4 @@ mysqldump.bin
 *.tgz
 *.swp
 .directory
+mysqldump_*.bin
