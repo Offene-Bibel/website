@@ -4,3 +4,6 @@ mysqldump.bin
 *.swp
 .directory
 mysqldump_*.bin
+website/static/img/clouds.mp4
+website/static/img/clouds_large.mp4
+website/static/img/clouds.jpg
