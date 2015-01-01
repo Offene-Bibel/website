@@ -7,3 +7,4 @@ mysqldump_*.bin
 website/static/img/clouds.mp4
 website/static/img/clouds_large.mp4
 website/static/img/clouds.jpg
+scripts/mw_users.csv
