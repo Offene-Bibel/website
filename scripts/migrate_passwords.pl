@@ -1,4 +1,13 @@
 #!/usr/bin/env perl
+=pod
+=head1 Usage
+To migrate all users from Drupal => Mediawiki do the following
+=over 4
+=item Run this script.
+=item Visit L<URL/wiki/Spezial:Benutzer_importieren> and import the generated mw_users.csv file.
+=item Run this script again.
+=cut
+
 use v5.12;
 use strict;
 use DBI;
@@ -92,7 +101,7 @@ my $groupDeleteStmt = $dbh->prepare(
     'DELETE FROM bibelwikiuser_groups WHERE ug_user = ? AND ug_group = ?'
 );
 
-open my $newUserFile, ">", "mw_users.csv";
+open my $newUserFile, ">:utf8", "mw_users.csv";
 
 foreach my $drupalUser (keys %drupalUsers) {
     my $dUser = $drupalUsers{$drupalUser};
@@ -108,7 +117,9 @@ foreach my $drupalUser (keys %drupalUsers) {
             my @dRoles = @{$dUser->{roles}};
         # - insert all missing groups
             foreach my $role (@dRoles) {
-                if(not $role ~~ @mwRoles) {
+                # Trim to 16, since there is only space for 16 places in the
+                # MW user_group table thus we need to trim to 16 to compare.
+                if(not substr($role, 0, 16) ~~ @mwRoles) {
                     $groupInsertStmt->bind_param(1, $mwUser->{id});
                     $groupInsertStmt->bind_param(2, $role);
                     $groupInsertStmt->execute;
