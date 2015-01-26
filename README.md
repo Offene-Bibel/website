@@ -32,10 +32,10 @@ Development Setup
 
     mysql -uroot
     create database offenebibel1 character set utf8 collate utf8_general_ci;
-    create user offenebibel identified by 'cgW3VWmrMg';
+    create user offenebibel identified by 'put_password_here';
     # the following grants access to the table from everywhere, shouldn''t do that
-    #grant ALL privileges on offenebibel1.* to offenebibel@'%' identified by 'cgW3VWmrMg';
-    grant ALL privileges on offenebibel1.* to offenebibel@localhost identified by 'cgW3VWmrMg';
+    #grant ALL privileges on offenebibel1.* to offenebibel@'%' identified by 'put_password_here';
+    grant ALL privileges on offenebibel1.* to offenebibel@localhost identified by 'put_password_here';
     quit
 
 4. Import the database dump.
