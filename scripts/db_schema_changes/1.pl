@@ -39,6 +39,7 @@ CREATE TABLE `bibelwikiofbi_chapter` (
   `book_id` int(11) NOT NULL,
   `number` int(11) NOT NULL,
   `verses` int(11) NOT NULL,
+  `latest_revision` int(10),
   PRIMARY KEY (`id`)
 );
 END
