@@ -119,7 +119,9 @@ foreach my $drupalUser (keys %drupalUsers) {
             foreach my $role (@dRoles) {
                 # Trim to 16, since there is only space for 16 places in the
                 # MW user_group table thus we need to trim to 16 to compare.
-                if(not substr($role, 0, 16) ~~ @mwRoles) {
+                # This is not true in the latest MW version.
+                #if(not substr($role, 0, 16) ~~ @mwRoles) {
+                if(not $role ~~ @mwRoles) {
                     $groupInsertStmt->bind_param(1, $mwUser->{id});
                     $groupInsertStmt->bind_param(2, $role);
                     $groupInsertStmt->execute;
