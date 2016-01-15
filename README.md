@@ -40,7 +40,7 @@ Development Setup
 
 4. Import the database dump.
 
-    mysql -uoffenebibel -p -hlocalhost --default-character-set=utf8 offenebibel1 <mysqldump_20140902.bin
+    mysql -uoffenebibel -p -hlocalhost --default-character-set=utf8 offenebibel1 <mysqldump.bin
 
 5. Adapt apache to serve the `website` directory. `scripts/apache.conf` is a configuration snippet that should pretty much get you there.
 6. Adapt `drupal/sites/default/settings.php` and `mediawiki/LocalSettings.php` to match your database and webserver.
@@ -50,7 +50,7 @@ Development Setup
 9. Update the git repository or do a fresh clone.
 
     git pull # update
-    rm -rf .git && git clone git@gitorious.org:offene-bibel/website.git # fresh clone
+    rm -rf .git && git clone https://github.com/Offene-Bibel/website.git # fresh clone
 
 
 If you want to set up the syntax validator too, there are some more steps to do:
