@@ -12,7 +12,6 @@ my @fileList = qw(
     mediawiki/extensions/di/iwDrupalConfig.php
     drupal/sites/default/settings.php
     drupal/sites/all/modules/mwi/mwi.config
-    static/server-side/headerFooter.php
 );
 my $resourceFolder = "resources";
 my $webFolder = "/kunden/248589_32760/webseiten/offene-bibel.de";
@@ -23,9 +22,11 @@ my $dbName = "db248589_10";
 my $dbHost = "mysql5.offene-bibel.de";
 my $dbPort = "3306";
 my $domain = "offene-bibel.de";
+my $drupal_salt;
+my $mw_secret;
 my $mode = $ARGV[0];
 
-if not $mode ~~ qw( fill, templatify, package ) {
+if ( not $mode ~~ [ 'fill', 'templatify', 'package' ]) {
     die "Wrong action given: \"$mode\" must be one of: fill, templatify, package.";
 }
 
@@ -37,6 +38,8 @@ GetOptions ("source:s" => \$webFolder,
             "port:i"   => \$dbPort,
             "folder:s" => \$snapshotFolder,
             "domain:s" => \$domain,
+            "drupal_salt:s"   => \$drupal_salt,
+            "mw_secret:s"   => \$mw_secret,
             )
             or die("Error in command line arguments\n");
 
@@ -46,15 +49,17 @@ my $dbPassword = <STDIN>; chomp $dbPassword;
 if ( $mode eq 'fill' ) {
     print 'Filling in database credentials... ';
         for (@fileList) {
-            my $file = "$snapshotFolder/offene-bibel.de/$_";
+            my $file = "$snapshotFolder/$_";
             my $template_file = $file . "_TEMPLATE";
             my $content = read_text( $template_file );
             $content =~ s/<&db_password&>/$dbPassword/g;
-            $content =~ s/<&db_name&>/$dbName/g;
+            $content =~ s/<&db_db&>/$dbName/g;
             $content =~ s/<&db_user&>/$dbUser/g;
             $content =~ s/<&db_host&>/$dbHost/g;
             $content =~ s/<&db_port&>/$dbPort/g;
             $content =~ s/<&domain&>/$domain/g;
+            $content =~ s/<&drupal_hash_salt&>/$drupal_salt/g;
+            $content =~ s/<&mw_secret&>/$mw_secret/g;
             chmod 0660, $file;
             write_text( $file, $content );
         }
@@ -62,15 +67,17 @@ if ( $mode eq 'fill' ) {
 }
 elsif ( $mode eq 'templatify' ) {
     for (@fileList) {
-        my $file = "$snapshotFolder/offene-bibel.de/$_";
+        my $file = "$snapshotFolder/$_";
         my $template_file = $file . "_TEMPLATE";
         my $content = read_text( $file );
         $content =~ s/$dbPassword/<&db_password&>/g;
-        $content =~ s/$dbName/<&db_name&>/g;
+        $content =~ s/$dbName/<&db_db&>/g;
         $content =~ s/$dbUser/<&db_user&>/g;
         $content =~ s/$dbHost/<&db_host&>/g;
         $content =~ s/$dbPort/<&db_port&>/g;
         $content =~ s/(?<!\@)$domain/<&domain&>/g;
+        $content =~ s/$drupal_salt/<&drupal_hash_salt&>/g;
+        $content =~ s/$mw_secret/<&mw_secret&>/g;
         chmod 0660, $template_file;
         write_text( $template_file, $content );
     }
